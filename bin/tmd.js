@@ -23,9 +23,7 @@ program
 	.description('新建单页应用项目 <项目名称>')
 	.option('-p, --proxy <proxyUrl>,','http请求代理地址 默认为工作文件夹配置proxy')
 	.action((name,cmd)=>{
-		console.log(name)
-		console.log( cleanArgs(cmd))
-		//require('../lib/inspect')(paths, cleanArgs(cmd))
+		require('../instruct/spa/index.js')(name, cleanArgs(cmd))
 	})
 
 //新建单页面项目
