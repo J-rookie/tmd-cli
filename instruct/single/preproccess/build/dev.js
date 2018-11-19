@@ -36,7 +36,7 @@ if(<% proxy %> != ""){
     app.use('/api', httpProxyMiddleware({
         target: <% proxy %>,
         pathRewrite: {
-            '^/api': ''
+            '^/api': '/api'
         },
         changeOrigin: true
     })); 

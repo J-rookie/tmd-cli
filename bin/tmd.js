@@ -47,6 +47,14 @@ program
 		//require('../lib/inspect')(paths, cleanArgs(cmd))
 	})
 
+//新建插件模式
+program
+	.command('plug <plug-name>')
+	.description('插件模式 <项目名称>')
+	.action((name,cmd)=>{
+		require('../instruct/plug/index.js')(name, cleanArgs(cmd))
+	})
+
 //解析命令行参数
 program.parse(process.argv)
 

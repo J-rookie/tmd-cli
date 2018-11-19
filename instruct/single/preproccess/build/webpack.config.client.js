@@ -32,44 +32,39 @@ const config = {
         }, {
             test: /\.vue$/,
             exclude: /node_modules/,
-            use: [{
-                loader: 'vue-loader',
-                options: {
-                    loaders: {
-                        js: 'babel-loader'
-                    }
-                }
-            }]
+            use: 'vue-loader'
         }, {
             test: /\.(jpg|png|gif|ico)$/,
             use: [{
-                loader: 'file-loader',
+                loader: 'url-loader',
                 options: {
-                    name: './images/[name].[ext]',
-                    publicPath:'../images/[name].[ext]',
+                    limit: 8196,
+                    name: './[name].[ext]',
+                    outputPath: './images/',
                 }
             }]
         }, {
             test: /\.css$/,
             //提取合并为同一个css文件
             use: ExtractTextPlugin.extract({
+                publicPath: '../',
                 fallback: "style-loader",
-                use: [ 'css-loader'],
+                use: [ "css-loader?minimize=true"],
             })
             
         }, {
             test: /\.scss$/,
             use: ExtractTextPlugin.extract({
+                publicPath: '../',
                 fallback: "style-loader",
-                use: ["css-loader", "sass-loader"]
+                use: ["css-loader?minimize=true", "sass-loader"]
             })
         }, {
             test: /\.(eot|woff|svg|ttf)$/,
             use: [{
-                loader: 'file-loader',
+                loader: 'url-loader',
                 options: {
-                    name: './fonts/[name].[ext]',
-                    publicPath: './fonts/',
+                    name: './[name].[ext]',
                     outputPath: './fonts/'
                 }
             }]
