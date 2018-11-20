@@ -5,14 +5,17 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const config = {
     //入口
     entry: {
-        <% name %>: [path.resolve(__dirname, '../src/main.js')],
+        <% name %>: ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],
     },
     //产出
     output: {
         path: path.resolve(__dirname, '../dist/'),
         filename: '[name].js?r=[hash]',
         publicPath: './',
-        libraryTarget: "commonjs2"
+        libraryTarget: "umd",
+        //libraryExport: 'default',
+        globalObject: 'this',
+        library:'<% name %>'
     },
     mode: 'production',
     //解析
@@ -68,12 +71,6 @@ const config = {
             filename: "css/[name].css?r=[hash]",
             disable: false,
             allChunks: true
-        }),
-        new HtmlWebpackPlugin({
-            addLinkCss: ['./css/<% name %>.css'],
-            filename: './index.html',
-            template: path.resolve(__dirname, '../template/hot.tpl'),
-            hash: true
         })
     ],
     //构建模式

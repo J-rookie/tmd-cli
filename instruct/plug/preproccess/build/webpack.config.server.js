@@ -5,14 +5,17 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const config = {
     //入口
     entry: {
-        <% name %>: [path.resolve(__dirname, '../src/main.js')],
+        <% name %>: ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],
     },
     //产出
     output: {
         path: path.resolve(__dirname, '../dist/'),
-        filename: '[name].js?r=[hash]',
+        filename: '[name].min.js?r=[hash]',
         publicPath: './',
-        libraryTarget: "commonjs2"
+        libraryTarget: "umd",
+        //libraryExport: 'default',
+        globalObject: 'this',
+        library:'<% name %>'
     },
     mode: 'production',
     //解析
@@ -71,7 +74,7 @@ const config = {
         })
     ],
     //构建模式
-    target: 'node'
+    target: 'web'
 }
 
 module.exports = config

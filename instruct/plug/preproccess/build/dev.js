@@ -9,7 +9,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.client.js');
 
-clientConfig.entry.wzlysdk.push(path.resolve(__dirname, './dev-client'));
+clientConfig.entry.wzlysdk.unshift(path.resolve(__dirname, './dev-client'));
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(),
     new Webpack.NoEmitOnErrorsPlugin())
