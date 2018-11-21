@@ -2,18 +2,23 @@ const path = require('path');
 const { spawn } = require('child_process');
 const filemanage = require('../../lib/filemanage.js');
 const Log = require('../../lib/log.js');
+const allocation = require('../../allocation');
 module.exports = function(name,options = {}){
 	let dirpath = './'+name,
 		shellStop = process.platform === 'win32';
 	Log.info('开始创建工作目录...')
 	//开始创建目录
 	filemanage.mkdir(dirpath).then(function(){
-		Log.suc('创建主文件夹成功').info('开始生成配置文件 -> "package.json"')
-		return filemanage.createFile(dirpath+'/package.json',JSON.stringify(Object.assign({},require(path.resolve(__dirname, './package')),{
-			name:name
-		})))
+		Log.suc('创建主文件夹成功').info('开始生成配置文件')
+		return filemanage.createFile(dirpath+'/package.json',allocation.package({
+			name:name,
+			version: '1.0.0',
+			vue:options.vue||false
+		}))
 	}).then(function(){
-		Log.suc('生成配置文件 -> "package.json" --> 成功').info('开始生成工具文件夹 -> "lib"')
+		return filemanage.createFile(dirpath+'/.babelrc',allocation.babel())
+	}).then(function(){
+		Log.suc('生成配置文件 --> 成功').info('开始生成工具文件夹 -> "lib"')
 		return filemanage.copyDir(path.resolve(__dirname, './lib'),dirpath+'/lib')
 	}).then(function(){
 		Log.suc('生成工具文件夹 -> "lib" --> 成功').info('开始生成配置文件 -> ".tmd"')
@@ -38,6 +43,7 @@ module.exports = function(name,options = {}){
 		 }  
 		});
 	}).catch((msg)=>{
+		console.log(msg)
 		Log.err(msg)
 	})
 }
