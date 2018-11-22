@@ -57,8 +57,5 @@ module.exports = function(opt = {
         config["devDependencies"]["vue-template-compiler"] = "^2.5.17";
     }
 
-
-    console.log(config)
-
     return JSON.stringify(config) || '这是一个错误的文件请联系作者!';
 }
