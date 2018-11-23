@@ -33,7 +33,8 @@ program
 program
 	.command('single <project-name>')
 	.description('新建单页面项目 <项目名称>')
-	.option('-p, --proxy <proxyUrl>,','http请求代理地址 默认为工作文件夹配置proxy')
+	.option('-h, --http <httpUrl>,','http请求地址 默认为空 ')
+	.option('-p, --proxy <proxyStop>,','是否开启代理 默认为false 当开启时使用生成的axios配置为相对地址')
 	.action((name,cmd)=>{
 		require('../instruct/single/index.js')(name, cleanArgs(cmd))
 	})
@@ -54,6 +55,7 @@ program
 program
 	.command('plug <plug-name>')
 	.description('插件模式 <项目名称>')
+	.option('-i, --install <way>,','初始化安装依赖方式 npm cnpm 默认为npm')
 	.action((name,cmd)=>{
 		require('../instruct/plug/index.js')(name, cleanArgs(cmd))
 	})

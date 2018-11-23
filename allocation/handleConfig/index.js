@@ -76,7 +76,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.client.js');
 
-clientConfig.entry.wzlysdk.unshift(path.resolve(__dirname, './dev-client'));
+clientConfig.entry.${data.name}.unshift(path.resolve(__dirname, './dev-client'));
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(),
     new Webpack.NoEmitOnErrorsPlugin())
@@ -97,9 +97,58 @@ app.listen(9080, '0.0.0.0', () => {
     console.log('打开成功')
 })`
              break;
+             case "SingleDevServer":
+             let proxyStr = data.http!=""&&data.proxy?
+`\n//代理配置
+app.use('/api', httpProxyMiddleware({
+    target: '${data.http}',
+    pathRewrite: {
+        '^/api': '/api'
+    },
+    changeOrigin: true
+}));\n`:'';
+                nodeString = `const express = require('express');
+const path = require('path');
+
+const Webpack = require("webpack");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const httpProxyMiddleware = require('http-proxy-middleware');
+
+//创建应用
+const app = express();
+
+const clientConfig = require('./webpack.config.client.js');
+
+clientConfig.entry.${data.name}.push(path.resolve(__dirname, './dev-client'));
+clientConfig.plugins.push(
+    new Webpack.HotModuleReplacementPlugin(), 
+    new Webpack.NoEmitOnErrorsPlugin(),
+    new HtmlWebpackPlugin({
+            addLinkCss: ['./css/${data.name}.css'],
+            filename: './${data.name}.html',
+            template: path.resolve(__dirname, '../template/hot.tpl'),
+            hash: true
+        }))
+// dev middleware
+const clientCompiler = Webpack(clientConfig);   
+const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
+    noInfo: true
+})
+
+app.use('/',devMiddleware)
+// 热重载
+app.use('/',require('webpack-hot-middleware')(clientCompiler))
+${proxyStr}
+//监听端口
+app.listen(9080, '0.0.0.0', () => {
+    console.log('打开成功')
+})`
+             break;
+             case "SingleBuildServer":
+             break;
             default:
-                reString = '这是一个错误的文件请联系作者'
-                break;
+            reString = '这是一个错误的文件请联系作者'
+            break;
         }
 
         return nodeString;
