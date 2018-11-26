@@ -57,10 +57,7 @@ module.exports = function(name,options = {}){
 		return filemanage.mkdir(buildpath)
 	}).then(function(){
 		//webpack客户端配置文件
-		return filemanage.createFile(buildpath+'/webpack.config.client.js',allocation.webpack("singleClient",{name:name}))
-	}).then(function(){
-		//webpack服务端配置文件
-		return filemanage.createFile(buildpath+'/webpack.config.server.js',allocation.webpack("singleServer",{name:name}))
+		return filemanage.createFile(buildpath+'/webpack.config.js',allocation.webpack("spa",createTmd))
 	}).then(function(){
 		//发开模式热重载启动依赖文件
 		return filemanage.createFile(buildpath+'/dev-client.js',allocation.handle.node('HotDevClient'))
