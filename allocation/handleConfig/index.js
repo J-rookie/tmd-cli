@@ -12,6 +12,18 @@ module.exports = {
             case "plug":
                 executeString = `import './main.scss';\n\nconst ${data.name} = {};\n\nmodule.exports = ${data.name};`
                 break;
+            //单页面模式main.js
+            case "single":
+                executeString = `//引入页面组件\nimport App from './App.vue';\n\nexport function createApp () {\n\tconst app = new Vue({\n\t// 根实例简单的渲染应用程序组件。\n\t\trender: h => h(App)\n\t})\n\treturn { app }\n}`;
+                break;
+            //单页面模式client-entry.js
+            case "singleClient":
+                executeString = `import axios from './lib/axios.${data.proxy?'client.':''}config.js';\nimport { createApp } from './main';\nimport './main.scss';\n\nVue.prototype.$http = axios;\n\nconst { app } = createApp();\n\napp.$mount('#app')`
+                break;
+            //server-entry.js
+            case "singleServer":
+                executeString = `import { createApp } from './main';\nimport axios from './lib/axios.${data.proxy?'server.':''}config.js';\n\nVue.prototype.$http = axios;\n\nexport default context => {\n\n\tconst { app } = createApp()\n\n\treturn app\n}`
+                break;
             default:
                 executeString = '这是一个错误的文件请联系作者'
                 break;
@@ -61,9 +73,9 @@ const handlePack = function(config){
 }
 
 handlePack(serverConfig).then(()=>{
-    console.log('\x1B[44m%s\x1B[49m', '插件打包成功');
+    console.log('\\x1B[44m%s\\x1B[49m', '插件打包成功');
 }).catch(function(){
-    console.log('\x1B[31m%s\x1B[39m', '插件打包失败');
+    console.log('\\x1B[31m%s\\x1B[39m', '插件打包失败');
 })`
                 break;
              case "PlugDevServer":
@@ -145,6 +157,59 @@ app.listen(9080, '0.0.0.0', () => {
 })`
              break;
              case "SingleBuildServer":
+             nodeString = `const fs = require('fs');
+const path = require('path');
+const Webpack = require("webpack");
+
+const clientConfig = require('./webpack.config.client.js');
+const serverConfig = require('./webpack.config.server.js');
+//客户端打包
+Webpack(clientConfig, (err, stats) => {
+    if (err || stats.hasErrors()) {
+        // 在这里处理错误
+        console.log('\\x1B[31m%s\\x1B[39m', '客户端脚本打包失败');
+        return;
+    }
+    console.log('\\x1B[44m%s\\x1B[49m', '客户端脚本打包成功');
+    //服务端打包
+    Webpack(serverConfig, (err, stats) => {
+        if (err || stats.hasErrors()) {
+            // 在这里处理错误
+            console.log('\\x1B[31m%s\\x1B[39m', '服务端ssr文件打包失败');
+            return;
+        }
+        console.log('\\x1B[44m%s\\x1B[49m', '服务端ssr文件打包成功');
+
+        const serverBundle = require('../dist/vue-ssr-server-bundle.json')
+        const clientManifest = require('../dist/vue-ssr-client-manifest.json')
+        const template = fs.readFileSync(path.resolve(__dirname, '../template/render.tpl'), 'utf-8');
+
+        //创建一个生成器
+        const createBundleRenderer = require('vue-server-renderer').createBundleRenderer;
+
+
+        let renderer = createBundleRenderer(serverBundle, {
+            runInNewContext: false, // 推荐
+            template, // 页面模板
+            clientManifest // 客户端构建 manifest
+        })
+
+        let context = {};
+        renderer.renderToString(context, (err, html) => {
+            if (err) {
+                console.log(err)
+                return;
+            }
+            fs.writeFile(path.resolve(__dirname, '../dist/${data.name}.html'), html, 'utf8', function(err) {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log('\\x1B[44m%s\\x1B[49m', '生成html文件成功');
+                }
+            });
+        })
+    })
+});`
              break;
             default:
             reString = '这是一个错误的文件请联系作者'

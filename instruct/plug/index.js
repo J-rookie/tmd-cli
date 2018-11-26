@@ -36,7 +36,7 @@ module.exports = function(name,options = {}){
 	Log.info('开始创建插件项目...')
 	//开始创建目录
 	filemanage.mkdir(dirpath).then(function(){
-		Log.suc('创建文件夹成功').info('开始生成资源文件')
+		Log.suc('创建文件夹成功').info('开始生成项目源代码')
 		return filemanage.mkdir(dirpath+'/src')
 	}).then(function(){
 		return filemanage.createFile(srcpath+'/main.js',allocation.handle.execute('plug',{
@@ -122,7 +122,6 @@ module.exports = function(name,options = {}){
 		//正常停止不输出
 		if(msg == 'shutoff') return;
 		//异常错误
-		console.log(msg)
 		Log.err(msg)
 	})
 }

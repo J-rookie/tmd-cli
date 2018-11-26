@@ -14,7 +14,7 @@ module.exports = function(type,data) {
 			output:`libraryTarget: "umd",\n\t\tlibrary:'${data.name}'`,
 			resolve:`extensions: ['.js']`,
 			rules:``,
-			target:'web',
+			target:`'web'`,
 			plugins:''
 		};
 		break;
@@ -25,7 +25,7 @@ module.exports = function(type,data) {
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
             rules:`{\n\t\t\ttest: /\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
-            target:'web',
+            target:`'web'`,
             plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew VueSSRClientPlugin()`
         };
         break;
@@ -36,7 +36,7 @@ module.exports = function(type,data) {
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
             rules:`{\n\t\t\ttest: /\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
-            target:'node',
+            target:`'node'`,
             plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew VueSSRServerPlugin()`
         };
         break;
@@ -59,7 +59,7 @@ const config = {
     //产出
     output: {
         path: path.resolve(__dirname, '../dist/'),
-        filename: '[name].js?r=[hash]',
+        filename: '[name].js?r='+Math.random().toString(36).substr(2),
         publicPath: './',
         ${configAdd.output}
     },

@@ -12,7 +12,7 @@ program
 	.command('create <work-name>')
 	.description('创建工作文件夹 <文件夹名称>')
 	.option('-h, --http <httpUrl>,','http请求地址 默认为空 ')
-	.option('-p, --proxy <proxyStop>,','是否开启代理 默认为false 当开启时使用生成的axios配置为相对地址')
+	.option('-p, --proxy','是否开启代理 默认为false 当开启时使用生成的axios配置为相对地址')
 	.option('-v, --vue','是否依赖vue开发')
 	.option('-r, --react','是否依赖react开发')
 	.option('-i, --install <way>,','初始化安装依赖方式 npm cnpm 默认为npm')
@@ -24,7 +24,10 @@ program
 program
 	.command('spa <spa-name>')
 	.description('新建单页应用项目 <项目名称>')
-	.option('-p, --proxy <proxyUrl>,','http请求代理地址 默认为工作文件夹配置proxy')
+	.option('-h, --http <httpUrl>,','http请求地址 默认为空 ')
+	.option('-p, --proxy','是否开启代理 默认为false 当开启时使用生成的axios配置为相对地址')
+	.option('-e, --no_extend','是否继承工作文件夹请求相关配置')
+	.option('-i, --install <way>,','初始化安装依赖方式 npm cnpm 默认为npm')
 	.action((name,cmd)=>{
 		require('../instruct/spa/index.js')(name, cleanArgs(cmd))
 	})
@@ -34,7 +37,9 @@ program
 	.command('single <project-name>')
 	.description('新建单页面项目 <项目名称>')
 	.option('-h, --http <httpUrl>,','http请求地址 默认为空 ')
-	.option('-p, --proxy <proxyStop>,','是否开启代理 默认为false 当开启时使用生成的axios配置为相对地址')
+	.option('-p, --proxy','是否开启代理 默认为false 当开启时使用生成的axios配置为相对地址')
+	.option('-e, --no_extend','是否继承工作文件夹请求相关配置')
+	.option('-i, --install <way>,','初始化安装依赖方式 npm cnpm 默认为npm')
 	.action((name,cmd)=>{
 		require('../instruct/single/index.js')(name, cleanArgs(cmd))
 	})
