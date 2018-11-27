@@ -56,11 +56,8 @@ module.exports = function(name,options = {}){
 		Log.suc('生成测试文件 --> 成功').info('开始生成项目构造配置文件')
 		return filemanage.mkdir(buildpath)
 	}).then(function(){
-		//webpack客户端配置文件
-		return filemanage.createFile(buildpath+'/webpack.config.client.js',allocation.webpack("plug",{name:name}))
-	}).then(function(){
-		//webpack服务端配置文件
-		return filemanage.createFile(buildpath+'/webpack.config.server.js',allocation.webpack("plug",{name:name}))
+		//webpack配置文件
+		return filemanage.createFile(buildpath+'/webpack.config.js',allocation.webpack("plug",{name:name}))
 	}).then(function(){
 		//发开模式热重载启动依赖文件
 		return filemanage.createFile(buildpath+'/dev-client.js',allocation.handle.node('HotDevClient'))

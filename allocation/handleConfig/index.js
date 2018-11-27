@@ -1,3 +1,5 @@
+const filemanage = require('../../utils/filemanage.js');
+const path = require('path');
 module.exports = {
     /*
      *创建执行文件
@@ -12,15 +14,23 @@ module.exports = {
             case "plug":
                 executeString = `import './main.scss';\n\nconst ${data.name} = {};\n\nmodule.exports = ${data.name};`
                 break;
-            //单页面模式main.js
+                //单页面模式main.js
             case "single":
-                executeString = `//引入页面组件\nimport App from './App.vue';\n\nexport function createApp () {\n\tconst app = new Vue({\n\t// 根实例简单的渲染应用程序组件。\n\t\trender: h => h(App)\n\t})\n\treturn { app }\n}`;
+                executeString = `import App from './App.vue';\n\nexport function createApp () {\n\tconst app = new Vue({\n\t\trender: h => h(App)\n\t})\n\treturn { app }\n}`;
                 break;
-            //单页面模式client-entry.js
+                //单页应用模式mainmain.js
+            case "spa":
+                executeString = `import App from './App.vue';\nimport { createRouter } from './routes';\nimport { createStore } from './store';\n\nexport function createApp () {\n\tconst router = createRouter()\n\tconst store = createStore()\n\tconst app = new Vue({\n\t\trouter,\n\t\tstore,\n\t\trender: h => h(App)\n\t})\n\treturn { app }\n}`;
+                break;
+                //单页面模式client-entry.js
             case "singleClient":
-                executeString = `import axios from './lib/axios.${data.proxy?'client.':''}config.js';\nimport { createApp } from './main';\nimport './main.scss';\n\nVue.prototype.$http = axios;\n\nconst { app } = createApp();\n\napp.$mount('#app')`
+                executeString = `import './main.scss';\nimport axios from './lib/axios.${data.proxy?'client.':''}config.js';\nimport { createApp } from './main';\n\nVue.prototype.$http = axios;\n\nconst { app } = createApp();\n\napp.$mount('#app')`
                 break;
-            //server-entry.js
+                //单页应用模式client-entry.js
+            case "spaClient":
+                executeString = `import './main.scss';\nimport axios from './lib/axios.config.js';\nimport { createApp } from './main';\n\nVue.prototype.$http = axios;\n\nconst { app } = createApp();\n\napp.$mount('#app')`
+                break;
+                //server-entry.js
             case "singleServer":
                 executeString = `import { createApp } from './main';\nimport axios from './lib/axios.${data.proxy?'server.':''}config.js';\n\nVue.prototype.$http = axios;\n\nexport default context => {\n\n\tconst { app } = createApp()\n\n\treturn app\n}`
                 break;
@@ -38,7 +48,8 @@ module.exports = {
      *return {String} 生成文件内容
      */
     node(type, data) {
-        let nodeString = '';
+        let nodeString = '',
+            proxyStr = '';
         switch (type) {
             //热重载必要文件
             case "HotDevClient":
@@ -57,7 +68,7 @@ hotClient.subscribe(function(event) {
 const path = require('path');
 const Webpack = require("webpack");
 
-const serverConfig = require('./webpack.config.server.js');
+const serverConfig = require('./webpack.config.js');
 
 const handlePack = function(config){
     return new Promise((resolve,reject)=>{
@@ -78,15 +89,15 @@ handlePack(serverConfig).then(()=>{
     console.log('\\x1B[31m%s\\x1B[39m', '插件打包失败');
 })`
                 break;
-             case "PlugDevServer":
-             	nodeString = `const express = require('express');
+            case "PlugDevServer":
+                nodeString = `const express = require('express');
 const path = require('path');
 
 const Webpack = require("webpack");
 
 const app = express();
 
-const clientConfig = require('./webpack.config.client.js');
+const clientConfig = require('./webpack.config.js');
 
 clientConfig.entry.${data.name}.unshift(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
@@ -109,17 +120,17 @@ app.use('/',require('webpack-hot-middleware')(clientCompiler))
 app.listen(9080, '0.0.0.0', () => {
     console.log('打开成功')
 })`
-             break;
-             case "SingleDevServer":
-             let proxyStr = data.http!=""&&data.proxy?
-`\n//代理配置
+                break;
+            case "SingleDevServer":
+                proxyStr = data.http != "" && data.proxy ?
+                    `\n//代理配置
 app.use('/api', httpProxyMiddleware({
     target: '${data.http}',
     pathRewrite: {
         '^/api': '/api'
     },
     changeOrigin: true
-}));\n`:'';
+}));\n` : '';
                 nodeString = `const express = require('express');
 const path = require('path');
 
@@ -157,9 +168,9 @@ ${proxyStr}
 app.listen(9080, '0.0.0.0', () => {
     console.log('打开成功')
 })`
-             break;
-             case "SingleBuildServer":
-             nodeString = `const fs = require('fs');
+                break;
+            case "SingleBuildServer":
+                nodeString = `const fs = require('fs');
 const path = require('path');
 const Webpack = require("webpack");
 
@@ -212,13 +223,64 @@ Webpack(clientConfig, (err, stats) => {
         })
     })
 });`
-             break;
+                break;
+            case "SpaDevServer":
+                proxyStr = data.http != "" && data.proxy ?
+                    `\n//代理配置
+app.use('/api', httpProxyMiddleware({
+    target: '${data.http}',
+    pathRewrite: {
+        '^/api': '/api'
+    },
+    changeOrigin: true
+}));\n` : '';
+                nodeString = `const express = require('express');
+const path = require('path');
+
+const Webpack = require("webpack");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const httpProxyMiddleware = require('http-proxy-middleware');
+
+//创建应用
+const app = express();
+
+const clientConfig = require('./webpack.config.js');
+
+clientConfig.entry.${data.name}.push(path.resolve(__dirname, './dev-client'));
+clientConfig.mode = "development";
+clientConfig.plugins.push(
+    new Webpack.HotModuleReplacementPlugin(), 
+    new Webpack.NoEmitOnErrorsPlugin())
+
+// dev middleware
+const clientCompiler = Webpack(clientConfig);   
+const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
+    noInfo: true
+})
+
+app.use('/',devMiddleware)
+// 热重载
+app.use('/',require('webpack-hot-middleware')(clientCompiler))
+${proxyStr}
+//监听端口
+app.listen(9080, '0.0.0.0', () => {
+    console.log('打开成功')
+})`
+                break;
             default:
-            reString = '这是一个错误的文件请联系作者'
-            break;
+                reString = '这是一个错误的文件请联系作者'
+                break;
         }
 
         return nodeString;
+    },
+    /*
+     *拷贝源代码至指定路径
+     *params { String } type 内容文件夹名
+     *params { String } ouputDir 路径
+     *return {Psomise} 固定返回promise对象
+     */
+    sc(type, ouputDir) {
+        return filemanage.copyDir(path.resolve(__dirname, './' + type), ouputDir)
     }
-
 }

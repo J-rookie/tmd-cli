@@ -21,10 +21,10 @@ module.exports = function(type,data) {
         case 'singleClient':
         configAdd = {
             require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst VueSSRClientPlugin = require('vue-server-renderer/client-plugin');`,
-            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],`,
+            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
-            rules:`{\n\t\t\ttest: /\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
+            rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
             target:`web`,
             plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew VueSSRClientPlugin()`
         };
@@ -32,23 +32,24 @@ module.exports = function(type,data) {
         case 'singleServer':
         configAdd = {
             require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst VueSSRServerPlugin = require('vue-server-renderer/server-plugin');`,
-            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],`,
-            output:``,
+            outputFilename:`'[name].js'`,
+            entry:`${data.name}: [path.resolve(__dirname, '../src/server-entry.js')],`,
+            output:`libraryTarget: 'commonjs2'`,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
-            rules:`{\n\t\t\ttest: /\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
+            rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
             target:`node`,
             plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew VueSSRServerPlugin()`
         };
         break;
         case 'spa':
         configAdd = {
-            require:``,
-            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],`,
+            require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\n`,
+            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
-            rules:`{\n\t\t\ttest: /\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
+            rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
             target:`web`,
-            plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin()`
+            plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew HtmlWebpackPlugin({\n\t\t\taddLinkCss: ['./css/${data.name}.css'],\n\t\t\tfilename: './${data.name}.html',\n\t\t\ttemplate: path.resolve(__dirname, '../template/render.tpl'),\n\t\t\thash: true\n})`
         };
         break;
 		default:
@@ -70,7 +71,7 @@ const config = {
     //产出
     output: {
         path: path.resolve(__dirname, '../dist/'),
-        filename: '[name].js?r='+Math.random().toString(36).substr(2),
+        filename: ${configAdd.outputFilename?configAdd.outputFilename:"'[name].js?r='+Math.random().toString(36).substr(2)"},
         publicPath: './',
         ${configAdd.output}
     },
@@ -82,11 +83,11 @@ const config = {
     //模块配置
     module: {
         rules: [${configAdd.rules}{
-            test: /\.js$/,
+            test: /\\.js$/,
             exclude: /node_modules/,
             use: 'babel-loader'
         }, {
-            test: /\.(jpg|png|gif|ico)$/,
+            test: /\\.(jpg|png|gif|ico)$/,
             use: [{
                 loader: 'url-loader',
                 options: {
@@ -96,7 +97,7 @@ const config = {
                 }
             }]
         }, {
-            test: /\.css$/,
+            test: /\\.css$/,
             //提取合并为同一个css文件
             use: ExtractTextPlugin.extract({
                 publicPath: '../',
@@ -105,14 +106,14 @@ const config = {
             })
 
         }, {
-            test: /\.scss$/,
+            test: /\\.scss$/,
             use: ExtractTextPlugin.extract({
                 publicPath: '../',
                 fallback: "style-loader",
                 use: ["css-loader?minimize=true", "sass-loader"]
             })
         }, {
-            test: /\.(eot|woff|svg|ttf)$/,
+            test: /\\.(eot|woff|svg|ttf)$/,
             use: [{
                 loader: 'url-loader',
                 options: {
@@ -125,7 +126,7 @@ const config = {
     //插件配置
     plugins: [
         new ExtractTextPlugin({
-            filename: "css/[name].css?r=[hash]",
+            filename: "css/[name].css?r="+Math.random().toString(36).substr(2),
             disable: false,
             allChunks: true
         }),

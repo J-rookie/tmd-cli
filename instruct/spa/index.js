@@ -63,10 +63,10 @@ module.exports = function(name,options = {}){
 		return filemanage.createFile(buildpath+'/dev-client.js',allocation.handle.node('HotDevClient'))
 	}).then(function(){
 		//发开模式启动文件
-		return filemanage.createFile(buildpath+'/dev.js',allocation.handle.node('SingleDevServer',createTmd))
+		return filemanage.createFile(buildpath+'/dev.js',allocation.handle.node('SpaDevServer',createTmd))
 	}).then(function(){
 		//生成模式启动文件
-		return filemanage.createFile(buildpath+'/build.js',allocation.handle.node('SingleBuildServer',createTmd))
+		return filemanage.createFile(buildpath+'/build.js',allocation.handle.node('build',createTmd))
 	}).then(function(){
 		Log.suc('生成项目构造配置文件 -> 成功').info('开始渲染模板')
 		return filemanage.mkdir(tplpath)
@@ -82,19 +82,23 @@ module.exports = function(name,options = {}){
 	}).then(function(){
 		return filemanage.mkdir(srcpath+'/images')
 	}).then(function(){
+		return allocation.handle.sc('controller',srcpath+'/controller');
+	}).then(function(){
+		return allocation.handle.sc('store',srcpath+'/store');
+	}).then(function(){
+		return allocation.handle.sc('routes',srcpath+'/routes');
+	}).then(function(){
 		return filemanage.createFile(srcpath+'/main.scss',allocation.css())
 	}).then(function(){
-		return filemanage.createFile(srcpath+'/App.vue',allocation.vueComponent("app"))
+		return filemanage.createFile(srcpath+'/App.vue',allocation.vueComponent("route"))
 	}).then(function(){
-		return filemanage.createFile(srcpath+'/main.js',allocation.handle.execute('single'))
+		return filemanage.createFile(srcpath+'/main.js',allocation.handle.execute('spa'))
 	}).then(function(){
-		return filemanage.createFile(srcpath+'/client-entry.js',allocation.handle.execute('singleClient',createTmd))
-	}).then(function(){
-		return filemanage.createFile(srcpath+'/server-entry.js',allocation.handle.execute('singleServer',createTmd))
+		return filemanage.createFile(srcpath+'/client-entry.js',allocation.handle.execute('spaClient',createTmd))
 	}).then(function(){
 		return filemanage.mkdir(srcpath+'/lib')
 	}).then(function(){
-		return filemanage.createFile(srcpath+'/lib/'+'axios.client.config.js',allocation.axios("client",createTmd))
+		return filemanage.createFile(srcpath+'/lib/'+'axios.config.js',allocation.axios("client",createTmd))
 	}).then(function(){
 		Log.suc('生成项目源代码 --> 成功').info('开始创建启动脚本')
 		return filemanage.createFile(dirpath+'/build.bat',"node ./build/build.js")
