@@ -89,6 +89,62 @@ handlePack(serverConfig).then(()=>{
     console.log('\\x1B[31m%s\\x1B[39m', '插件打包失败');
 })`
                 break;
+                //使用jq的多页面打包
+                case "pages$build":
+                nodeString = `const fs = require('fs');
+const path = require('path');
+const Webpack = require("webpack");
+
+const serverConfig = require('./webpack.config.js');
+
+const handlePack = function(config){
+    return new Promise((resolve,reject)=>{
+        Webpack(config, (err, stats) => {
+            if (err || stats.hasErrors()) {
+                console.log(err)
+                reject();
+                return;
+            }
+            resolve();
+        })
+    })
+}
+
+handlePack(serverConfig).then(()=>{
+    return new Promise((resolve,reject)=>{
+        let  pros = [];
+        fs.readdir(path.resolve(__dirname, '../src'), (err, data)=>{
+            if(err){
+            reject(err)
+          }else{
+            data.map((e)=>{
+                if(/(\\.html)$/.test(e)){
+                    pros.push(new Promise((res,rej)=>{
+                        fs.copyFile(path.resolve(__dirname, '../src/'+e), path.resolve(__dirname, '../dist/'+e), function(err) {
+                            if (err) {
+                                rej(err)
+                            } else {
+                                res();
+                            }
+                        });
+                    }))
+                }
+            })
+            
+            Promise.all(pros).then(()=>{
+                resolve();
+            }).catch((err)=>{
+                reject(err)
+            })
+          }
+        })
+    })
+}).then(function(){
+    console.log('\\x1B[44m%s\\x1B[49m', '插件打包成功');
+}).catch(function(err){
+    console.log('\\x1B[31m%s\\x1B[39m', '插件打包失败');
+})`
+                break;
             case "PlugDevServer":
                 nodeString = `const express = require('express');
 const path = require('path');
@@ -260,6 +316,50 @@ const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
 
 app.use('/',devMiddleware)
 // 热重载
+app.use('/',require('webpack-hot-middleware')(clientCompiler))
+${proxyStr}
+//监听端口
+app.listen(9080, '0.0.0.0', () => {
+    console.log('打开成功')
+})`
+                break;
+                case "PagesDevServer":
+                proxyStr = data.http != "" && data.proxy ?
+                    `\n//代理配置
+app.use('/api', httpProxyMiddleware({
+    target: '${data.http}',
+    pathRewrite: {
+        '^/api': '/api'
+    },
+    changeOrigin: true
+}));\n` : '';
+                nodeString = `const express = require('express');
+const path = require('path');
+
+const Webpack = require("webpack");
+
+const app = express();
+
+const clientConfig = require('./webpack.config.js');
+
+for(let e in clientConfig.entry){
+    clientConfig.entry[e].unshift(path.resolve(__dirname, './dev-client'));
+}
+
+clientConfig.mode = "development";
+clientConfig.plugins.push(
+    new Webpack.HotModuleReplacementPlugin(),
+    new Webpack.NoEmitOnErrorsPlugin())
+const clientCompiler = Webpack(clientConfig);
+const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
+    log: false,
+    heartbeat: 2500,
+    noInfo: true
+})
+
+app.use(express.static(path.resolve(__dirname, '../src')));
+
+app.use('/',devMiddleware)
 app.use('/',require('webpack-hot-middleware')(clientCompiler))
 ${proxyStr}
 //监听端口

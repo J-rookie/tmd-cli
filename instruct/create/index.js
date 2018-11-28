@@ -14,6 +14,7 @@ module.exports = function(name,options = {}){
 			proxy:options.proxy||false,
 			vueDepend:typeof options.no_vue === 'boolean'?!options.no_vue:true,
 			reactDepend:!typeof options.no_react === 'boolean'?!options.no_react:true,
+			jqueryDepend:!typeof options.no_jquery === 'boolean'?!options.no_jquery:true,
 			install:"npm",
 			type:"work"
 		},options,{
@@ -29,7 +30,8 @@ module.exports = function(name,options = {}){
 		return filemanage.createFile(dirpath+'/package.json',allocation.package({
 			name:name,
 			version: '1.0.0',
-			vue:createTmd.vueDepend
+			vue:createTmd.vueDepend,
+			$:createTmd.jqueryDepend,
 		}))
 	}).then(function(){
 		Log.suc('生成配置文件  -> "package.json" --> 成功').info('开始生成配置文件 -> ".babelrc"')

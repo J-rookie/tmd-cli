@@ -52,6 +52,35 @@ module.exports = function(type,data) {
             plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew HtmlWebpackPlugin({\n\t\t\taddLinkCss: ['./css/${data.name}.css'],\n\t\t\tfilename: './${data.name}.html',\n\t\t\ttemplate: path.resolve(__dirname, '../template/render.tpl'),\n\t\t\thash: true\n})`
         };
         break;
+        case 'pagesjQuery':
+        configAdd = {
+            require:``,
+            outputFilename:`'./js/[name].js?r='+Math.random().toString(36).substr(2)`,
+            entry:function(){
+                let pagesjQueryEntry = [];
+                data.subpage.map(e=>{
+                    pagesjQueryEntry.push(`${e}: ['babel-polyfill',path.resolve(__dirname, '../src/entry/${e}.js')],\n`)
+                })
+                return pagesjQueryEntry.join("");
+            }(),
+            output:``,
+            resolve:`extensions: ['.js']`,
+            rules:``,
+            target:`web`,
+            plugins:`new Webpack.ProvidePlugin({$: 'jquery'})\n`
+        };
+        break;
+        case 'pagesVue':
+        configAdd = {
+            require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\n`,
+            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
+            output:``,
+            resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
+            rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
+            target:`web`,
+            plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew HtmlWebpackPlugin({\n\t\t\taddLinkCss: ['./css/${data.name}.css'],\n\t\t\tfilename: './${data.name}.html',\n\t\t\ttemplate: path.resolve(__dirname, '../template/render.tpl'),\n\t\t\thash: true\n})`
+        };
+        break;
 		default:
 		break;
 	}
@@ -126,7 +155,7 @@ const config = {
     //插件配置
     plugins: [
         new ExtractTextPlugin({
-            filename: "css/[name].css?r="+Math.random().toString(36).substr(2),
+            filename: "css/${type==='pagesjQuery'||type==='pagesVue'?data.name:'[name]'}.css?r="+Math.random().toString(36).substr(2),
             disable: false,
             allChunks: true
         }),

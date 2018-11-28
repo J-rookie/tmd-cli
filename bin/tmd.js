@@ -54,6 +54,7 @@ program
 	.option('-e, --no_extend','是否继承工作文件夹请求相关配置')
 	.option('-i, --install <way>,','初始化安装依赖方式 npm cnpm 默认为npm')
 	.option('-s, --subpage <subpages>,','页面名称集合已,逗号分隔')
+	.option('-m, --mode <mode-name>,','页面名称集合已,逗号分隔')
 	.action((name,cmd)=>{
 		require('../instruct/pages/index.js')(name, cleanArgs(cmd))
 	})

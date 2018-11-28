@@ -100,7 +100,6 @@ module.exports = {
                         }else{
                             pros.push(this.copyDir(p,newurl+'/'+e))
                         }
-			  			
 				  	})
 				  	Promise.all(pros).then(()=>{
 				  		resolve();

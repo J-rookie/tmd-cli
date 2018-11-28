@@ -56,6 +56,10 @@ module.exports = function(opt = {
         config["devDependencies"]["vue-loader"] = "^15.4.2";
         config["devDependencies"]["vue-template-compiler"] = "^2.5.17";
     }
+    //如果opt.$添加jquery依赖
+    if (opt.$ == true) {
+        config["dependencies"]["jquery"] = "^3.3.1";
+    }
 
     return JSON.stringify(config) || '这是一个错误的文件请联系作者!';
 }

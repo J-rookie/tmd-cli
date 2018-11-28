@@ -19,8 +19,8 @@ module.exports = function(name,options = {}){
 			version:require(path.resolve(__dirname, '../../package')).version,
 			type:"single",
 			isAlone:true,
-			install:'npm',
-			no_extend:false,
+			install:options.install=='cnpm'?'cnpm':'npm',
+			no_extend:options.no_extend||false,
 			http:'',
 			proxy:false
 		};
@@ -35,20 +35,17 @@ module.exports = function(name,options = {}){
 
 		if(tmdConfig&&tmdConfig.type==="work"){
 				createTmd['isAlone'] = false;
-				createTmd['no_extend'] = options.extend;
-			if(!options.no_extend){
+			if(!createTmd.no_extend){
 				createTmd['http'] = tmdConfig.http;
 				createTmd['proxy'] = tmdConfig.proxy;
+			}else{
+				reateTmd['http']=options.http||"";
+				createTmd['proxy']=options.proxy||false;
 			}
 		}else{
 			createTmd['http']=options.http||"";
 			createTmd['proxy']=options.proxy||false;
 		}
-
-		Object.assign(createTmd,options,{
-			install:options.install=='cnpm'?'cnpm':'npm',
-			no_extend:options.no_extend ||false
-		})
 
 	Log.info('开始创建单页面项目...')
 	//开始创建目录
@@ -127,7 +124,8 @@ module.exports = function(name,options = {}){
 			Log.suc('生成配置文件 -> ".tmd"').info('开始生成配置文件 -> "package.json"')
 			return filemanage.createFile(dirpath+'/package.json',allocation.package({
 				name:name,
-				version: '1.0.0'
+				version: '1.0.0',
+				vue:true
 			}))
 		}
 	}).then(function(){
