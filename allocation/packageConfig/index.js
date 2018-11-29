@@ -43,6 +43,10 @@ module.exports = function(opt = {
             "webpack-cli": "^3.1.0",
             "webpack-dev-middleware": "^3.4.0",
             "webpack-hot-middleware": "^2.24.3"
+        },
+        "engines": {
+            "node": ">= 10.7.0",
+            "npm": ">= 6.1.0"
         }
     };
 
