@@ -236,7 +236,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.js');
 
-clientConfig.entry.${data.name}.unshift(path.resolve(__dirname, './dev-client'));
+clientConfig.entry.['${data.name}'].unshift(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(),
@@ -280,7 +280,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.client.js');
 
-clientConfig.entry.${data.name}.push(path.resolve(__dirname, './dev-client'));
+clientConfig.entry.['${data.name}'].push(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(), 
@@ -393,7 +393,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.js');
 
-clientConfig.entry.${data.name}.push(path.resolve(__dirname, './dev-client'));
+clientConfig.entry.['${data.name}'].push(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(), 
@@ -483,7 +483,7 @@ const clientConfig = require('./webpack.config.client.js');
 
 clientConfig.entry = {\n`+function(){
         return data.subpage.map(e=>{
-                    return `${e}: [path.resolve(__dirname, './dev-client'),'babel-polyfill',path.resolve(__dirname, '../src/entry/${e}/client-entry.js')],\n`
+                    return `'${e}': [path.resolve(__dirname, './dev-client'),'babel-polyfill',path.resolve(__dirname, '../src/entry/${e}/client-entry.js')],\n`
 }).join("");}()+`}
 
 clientConfig.mode = "development";

@@ -10,7 +10,7 @@ module.exports = function(type,data) {
 		case 'plug':
 		configAdd = {
 			require:``,
-			entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],`,
+			entry:`'${data.name}': ['babel-polyfill',path.resolve(__dirname, '../src/main.js')],`,
 			output:`libraryTarget: "umd",\n\t\tlibrary:'${data.name}'`,
 			resolve:`extensions: ['.js']`,
 			rules:``,
@@ -21,7 +21,7 @@ module.exports = function(type,data) {
         case 'singleClient':
         configAdd = {
             require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst VueSSRClientPlugin = require('vue-server-renderer/client-plugin');`,
-            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
+            entry:`'${data.name}': ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
             rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
@@ -33,7 +33,7 @@ module.exports = function(type,data) {
         configAdd = {
             require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst VueSSRServerPlugin = require('vue-server-renderer/server-plugin');`,
             outputFilename:`'[name].js'`,
-            entry:`${data.name}: [path.resolve(__dirname, '../src/server-entry.js')],`,
+            entry:`'${data.name}': [path.resolve(__dirname, '../src/server-entry.js')],`,
             output:`libraryTarget: 'commonjs2'`,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
             rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
@@ -44,7 +44,7 @@ module.exports = function(type,data) {
         case 'spa':
         configAdd = {
             require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\n`,
-            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
+            entry:`'${data.name}': ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
             rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
@@ -59,7 +59,7 @@ module.exports = function(type,data) {
             entry:function(){
                 let pagesjQueryEntry = [];
                 data.subpage.map(e=>{
-                    pagesjQueryEntry.push(`${e}: ['babel-polyfill',path.resolve(__dirname, '../src/entry/${e}.js')],\n`)
+                    pagesjQueryEntry.push(`'${e}': ['babel-polyfill',path.resolve(__dirname, '../src/entry/${e}.js')],\n`)
                 })
                 return pagesjQueryEntry.join("");
             }(),
