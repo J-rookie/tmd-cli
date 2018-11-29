@@ -236,7 +236,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.js');
 
-clientConfig.entry.['${data.name}'].unshift(path.resolve(__dirname, './dev-client'));
+clientConfig.entry['${data.name}'].unshift(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(),
@@ -280,7 +280,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.client.js');
 
-clientConfig.entry.['${data.name}'].push(path.resolve(__dirname, './dev-client'));
+clientConfig.entry['${data.name}'].push(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(), 
@@ -393,7 +393,7 @@ const app = express();
 
 const clientConfig = require('./webpack.config.js');
 
-clientConfig.entry.['${data.name}'].push(path.resolve(__dirname, './dev-client'));
+clientConfig.entry['${data.name}'].push(path.resolve(__dirname, './dev-client'));
 clientConfig.mode = "development";
 clientConfig.plugins.push(
     new Webpack.HotModuleReplacementPlugin(), 
