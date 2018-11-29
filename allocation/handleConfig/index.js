@@ -24,7 +24,7 @@ module.exports = {
                 break;
                 //单页面模式client-entry.js
             case "singleClient":
-                executeString = `import '${data.type==='pages'?'../..':'.'}/main.scss';\nimport axios from '${data.type==='pages'?'../..':'.'}/lib/axios.${data.proxy?'client.':''}config.js';\nimport { createApp } from './main';\n\nVue.prototype.$http = axios;\n\nconst { app } = createApp();\n\napp.$mount('#app')`
+                executeString = `import './main.scss';\nimport axios from '${data.type==='pages'?'../..':'.'}/lib/axios.${data.proxy?'client.':''}config.js';\nimport { createApp } from './main';\n\nVue.prototype.$http = axios;\n\nconst { app } = createApp();\n\napp.$mount('#app')`
                 break;
                 //单页应用模式client-entry.js
             case "spaClient":
@@ -165,26 +165,28 @@ const buildFunc = function(client,server,names = [],cbOk){
     client.entry = { 
         [name]: ['babel-polyfill',path.resolve(__dirname, '../src/entry/'+name+'/client-entry.js')],
     }
+    client.output.path = path.resolve(__dirname, '../dist/'+name+'/');
     server.entry = { 
         [name]: [path.resolve(__dirname, '../src/entry/'+name+'/server-entry.js')],
     }
+    server.output.path = path.resolve(__dirname, '../dist/'+name+'/');
     //客户端打包
     Webpack(client, (err, stats) => {
         if (err || stats.hasErrors()) {
             // 在这里处理错误
-            console.log('\x1B[31m%s\x1B[39m', name+'客户端脚本打包失败');
+            console.log('\\x1B[31m%s\\x1B[39m', name+'客户端脚本打包失败');
         }else{
-                console.log('\x1B[44m%s\x1B[49m', name+'客户端脚本打包成功');
+                console.log('\\x1B[44m%s\\x1B[49m', name+'客户端脚本打包成功');
             //服务端打包
             Webpack(server, (err, stats) => {
                 if (err || stats.hasErrors()) {
                     // 在这里处理错误
-                    console.log('\x1B[31m%s\x1B[39m', name+'服务端ssr文件打包失败');
+                    console.log('\\x1B[31m%s\\x1B[39m', name+'服务端ssr文件打包失败');
                 }else{
-                    console.log('\x1B[44m%s\x1B[49m', name+'服务端ssr文件打包成功');
+                    console.log('\\x1B[44m%s\\x1B[49m', name+'服务端ssr文件打包成功');
 
-                    const serverBundle = require('../dist/vue-ssr-server-bundle.json')
-                    const clientManifest = require('../dist/vue-ssr-client-manifest.json')
+                    const serverBundle = require('../dist/'+name+'/vue-ssr-server-bundle.json')
+                    const clientManifest = require('../dist/'+name+'/vue-ssr-client-manifest.json')
                     const template = fs.readFileSync(path.resolve(__dirname, '../template/render.tpl'), 'utf-8');
 
                     //创建一个生成器
@@ -202,11 +204,11 @@ const buildFunc = function(client,server,names = [],cbOk){
                         if (err) {
                             console.log(err)
                         }else{
-                            fs.writeFile(path.resolve(__dirname, '../dist/'+name+'.html'), html, 'utf8', function(err) {
+                            fs.writeFile(path.resolve(__dirname, '../dist/'+name+'/index.html'), html, 'utf8', function(err) {
                                 if (err) {
                                     console.log(err)
                                 } else {
-                                    console.log('\x1B[44m%s\x1B[49m', name+'生成html文件成功');
+                                    console.log('\\x1B[44m%s\\x1B[49m', name+'生成html文件成功');
                                     buildFunc(client,server,names,cbOk);
                                 }
                             });
@@ -221,21 +223,7 @@ const buildFunc = function(client,server,names = [],cbOk){
     });
 }
 
-buildFunc(clientConfig,serverConfig,[`+function(){
-        return data.subpage.map(e=>`"${e}"`).join(",");}()+`],function(){
-    try {
-      fs.unlinkSync(path.resolve(__dirname, '../dist/vue-ssr-server-bundle.json'))
-      try{
-        fs.unlinkSync(path.resolve(__dirname, '../dist/vue-ssr-client-manifest.json'))
-        }catch(e){
-            throw e;
-        }
-    } catch (err) {
-      // 处理异常。
-      console.log(e)
-    }
-    
-})`
+buildFunc(clientConfig,serverConfig,[`+function(){return data.subpage.map(e=>`"${e}"`).join(",");}()+`],function(){})`
                 break;
             //插件打包模式
             case "PlugDevServer":

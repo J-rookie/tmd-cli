@@ -11,7 +11,7 @@ module.exports = function(type,data={}){
 		data = type;
 	}
 	if(data.proxy){
-		httpBaseUrl = type==='client'?"/api/":data.http;
+		httpBaseUrl = type==='client'?"/api/":data.http+"/api/";
 	}else{
 		httpBaseUrl = data.http;
 	}

@@ -103,10 +103,11 @@ module.exports = function(name, options = {}) {
         //vue模式
         if (mode === "vue") {
             subpage.map(e => {
-            	ps.push(filemanage.createFile(`${srcentrypath}/${e}/App.vue`, allocation.vueComponent("app")))
-                ps.push(filemanage.createFile(`${srcentrypath}/${e}/main.js`, allocation.handle.execute('single')))
-                ps.push(filemanage.createFile(`${srcentrypath}/${e}/client-entry.js`, allocation.handle.execute('singleClient', createTmd)))
-                ps.push(filemanage.createFile(`${srcentrypath}/${e}/server-entry.js`, allocation.handle.execute('singleServer', createTmd)))
+            	ps.push(filemanage.createFile(`${srcentrypath}/${e}/main.scss`, `@import '../../main.scss';`),
+                    filemanage.createFile(`${srcentrypath}/${e}/App.vue`, allocation.vueComponent("app")),
+                    filemanage.createFile(`${srcentrypath}/${e}/main.js`, allocation.handle.execute('single')),
+                    filemanage.createFile(`${srcentrypath}/${e}/client-entry.js`, allocation.handle.execute('singleClient', createTmd)),
+                    filemanage.createFile(`${srcentrypath}/${e}/server-entry.js`, allocation.handle.execute('singleServer', createTmd)))
             })
             //普通jq模式
         } else if (mode === "jquery") {

@@ -112,7 +112,7 @@ const config = {
     },
     //产出
     output: {
-        path: path.resolve(__dirname, '../dist/'),
+        ${type==='pagesVueServer'?"path: path.resolve(__dirname, '../dist/'),":''}
         filename: ${configAdd.outputFilename?configAdd.outputFilename:"'[name].js?r='+Math.random().toString(36).substr(2)"},
         publicPath: './',
         ${configAdd.output}
@@ -168,7 +168,7 @@ const config = {
     //插件配置
     plugins: [
         new ExtractTextPlugin({
-            filename: "css/${type==='pagesjQuery'||type==='pagesVueClient'||type==='pagesVueServer'?data.name:'[name]'}.css?r="+Math.random().toString(36).substr(2),
+            filename: "css/${type==='pagesjQuery'?data.name:'[name]'}.css?r="+Math.random().toString(36).substr(2),
             disable: false,
             allChunks: true
         }),
