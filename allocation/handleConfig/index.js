@@ -287,7 +287,7 @@ clientConfig.plugins.push(
     new Webpack.NoEmitOnErrorsPlugin(),
     new HtmlWebpackPlugin({
             addLinkCss: ['./css/${data.name}.css'],
-            filename: './${data.name}.html',
+            filename: './index.html',
             template: path.resolve(__dirname, '../template/hot.tpl'),
             hash: true
         }))
@@ -350,7 +350,7 @@ Webpack(clientConfig, (err, stats) => {
                 console.log(err)
                 return;
             }
-            fs.writeFile(path.resolve(__dirname, '../dist/${data.name}.html'), html, 'utf8', function(err) {
+            fs.writeFile(path.resolve(__dirname, '../dist/index.html'), html, 'utf8', function(err) {
                 if (err) {
                     console.log(err)
                 } else {
