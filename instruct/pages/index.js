@@ -9,6 +9,7 @@ const allocation = require('../../allocation');
 module.exports = function(name, options = {}) {
     let dirpath = './' + name,
         buildpath = dirpath + '/build',
+        tplpath = dirpath+'/template',
         srcpath = dirpath + '/src',
         srcentrypath = srcpath + '/entry',
         shellStop = process.platform === 'win32',
@@ -16,14 +17,14 @@ module.exports = function(name, options = {}) {
         tmdConfig = null,
         mode = "jquery",
         createTmd = {
-            name:name,
-			version:require(path.resolve(__dirname, '../../package')).version,
-			type:"pages",
-			isAlone:true,
-			install:'npm',
-			no_extend:options.no_extend || false,
-			http:'',
-			proxy:false
+            name: name,
+            version: require(path.resolve(__dirname, '../../package')).version,
+            type: "pages",
+            isAlone: true,
+            install: 'npm',
+            no_extend: options.no_extend || false,
+            http: '',
+            proxy: false
         },
         tmdHandle = null,
         ps = [];
@@ -49,9 +50,9 @@ module.exports = function(name, options = {}) {
         if (!createTmd.no_extend) {
             createTmd['http'] = tmdConfig.http;
             createTmd['proxy'] = tmdConfig.proxy;
-        }else{
-        	createTmd['http'] = options.http || "";
-        	createTmd['proxy'] = options.proxy || false;
+        } else {
+            createTmd['http'] = options.http || "";
+            createTmd['proxy'] = options.proxy || false;
         }
     } else {
         createTmd['http'] = options.http || "";
@@ -71,11 +72,22 @@ module.exports = function(name, options = {}) {
     }).then(function() {
         return filemanage.mkdir(srcentrypath)
     }).then(function() {
+        if (mode === "vue") {
+            let vps = subpage.map((e) => {
+                return filemanage.mkdir(`${srcentrypath}/${e}`)
+            });
+
+            return Promise.all(vps);
+        } else if (mode === "jquery") {
+            return Promise.resolve();
+        }
+
+    }).then(function() {
         return filemanage.createFile(srcpath + '/main.scss', allocation.css())
     }).then(function() {
         //vue模式
         if (mode === "vue") {
-
+            return Promise.resolve();
             //普通jq模式
         } else if (mode === "jquery") {
             subpage.map(e => {
@@ -90,7 +102,12 @@ module.exports = function(name, options = {}) {
         ps = [];
         //vue模式
         if (mode === "vue") {
-
+            subpage.map(e => {
+            	ps.push(filemanage.createFile(`${srcentrypath}/${e}/App.vue`, allocation.vueComponent("app")))
+                ps.push(filemanage.createFile(`${srcentrypath}/${e}/main.js`, allocation.handle.execute('single')))
+                ps.push(filemanage.createFile(`${srcentrypath}/${e}/client-entry.js`, allocation.handle.execute('singleClient', createTmd)))
+                ps.push(filemanage.createFile(`${srcentrypath}/${e}/server-entry.js`, allocation.handle.execute('singleServer', createTmd)))
+            })
             //普通jq模式
         } else if (mode === "jquery") {
             subpage.map(e => {
@@ -102,9 +119,35 @@ module.exports = function(name, options = {}) {
         Log.suc('生成项目源代码 --> 成功').info('开始生成项目构造配置文件')
         return filemanage.mkdir(buildpath)
     }).then(function() {
+        let createDir = [filemanage.mkdir(srcpath + '/images')];
+        if (mode === "vue") {
+            createDir.push(filemanage.mkdir(srcpath + '/components'))
+            createDir.push(filemanage.mkdir(srcpath + '/lib'))
+            createDir.push(filemanage.mkdir(tplpath))
+        }
+        return Promise.all(createDir)
+    }).then(function() {
+        if (mode === "vue") {
+        	let createTplAndAxios = [filemanage.createFile(tplpath+'/hot.tpl',allocation.html({body:`\t<div id="app"></div>\n`})),
+                    filemanage.createFile(tplpath+'/render.tpl',allocation.html({body:`\t<!--vue-ssr-outlet-->\n`}))];
+            //如果开启代理模式 生成2个文件
+            if (createTmd.proxy) {
+            	createTplAndAxios.push(filemanage.createFile(srcpath + '/lib/' + 'axios.client.config.js', allocation.axios("client", createTmd)));
+            	createTplAndAxios.push(filemanage.createFile(srcpath + '/lib/' + 'axios.server.config.js', allocation.axios("server", createTmd)));
+                //否者生成单文件
+            } else {
+            	createTplAndAxios.push(filemanage.createFile(srcpath + '/lib/' + 'axios.config.js', allocation.axios(createTmd)));
+            }
+            return Promise.all(createTplAndAxios)
+        } else {
+            return Promise.resolve();
+        }
+    }).then(function() {
         //webpack配置文件
         if (mode === "vue") {
-            return filemanage.createFile(buildpath + '/webpack.config.js', allocation.webpack("pagesVue", createTmd))
+            return Promise.all([filemanage.createFile(buildpath + '/webpack.config.client.js', allocation.webpack("pagesVueClient", createTmd)),
+                filemanage.createFile(buildpath + '/webpack.config.server.js', allocation.webpack("pagesVueServer", createTmd))
+            ])
             //普通jq模式
         } else if (mode === "jquery") {
             return filemanage.createFile(buildpath + '/webpack.config.js', allocation.webpack("pagesjQuery", createTmd))
@@ -114,12 +157,17 @@ module.exports = function(name, options = {}) {
         //发开模式热重载启动依赖文件
         return filemanage.createFile(buildpath + '/dev-client.js', allocation.handle.node('HotDevClient'))
     }).then(function() {
-        console.log(createTmd)
-        //发开模式启动文件
-        return filemanage.createFile(buildpath + '/dev.js', allocation.handle.node('PagesDevServer', createTmd))
+    	if (mode === "vue") {
+    		return filemanage.createFile(buildpath + '/dev.js', allocation.handle.node('PagesVueDevServer', createTmd))
+    	} else if (mode === "jquery") {
+            return filemanage.createFile(buildpath + '/dev.js', allocation.handle.node('PagesDevServer', createTmd))
+        }
     }).then(function() {
-        //生成模式启动文件
-        return filemanage.createFile(buildpath + '/build.js', allocation.handle.node('pages$build'))
+        if (mode === "vue") {
+    		return filemanage.createFile(buildpath + '/build.js', allocation.handle.node('PagesVueBuild',createTmd))
+    	} else if (mode === "jquery") {
+            return filemanage.createFile(buildpath + '/build.js', allocation.handle.node('Pages$Build',createTmd))
+        }
     }).then(function() {
         Log.suc('生成项目构造配置文件 --> 成功').info('开始创建启动脚本')
         return filemanage.createFile(dirpath + '/build.bat', "node ./build/build.js")
@@ -139,7 +187,8 @@ module.exports = function(name, options = {}) {
             return filemanage.createFile(dirpath + '/package.json', allocation.package({
                 name: name,
                 version: '1.0.0',
-                vue: true
+                vue: mode === "vue",
+                $: mode === "jquery"
             }))
         }
     }).then(function() {

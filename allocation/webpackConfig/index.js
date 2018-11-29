@@ -70,21 +70,34 @@ module.exports = function(type,data) {
             plugins:`new Webpack.ProvidePlugin({$: 'jquery'})\n`
         };
         break;
-        case 'pagesVue':
+        case 'pagesVueClient':
         configAdd = {
-            require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\n`,
-            entry:`${data.name}: ['babel-polyfill',path.resolve(__dirname, '../src/client-entry.js')],`,
+            require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst VueSSRClientPlugin = require('vue-server-renderer/client-plugin');\nconst HtmlWebpackPlugin = require('html-webpack-plugin');\n`,
+            entry:``,
             output:``,
             resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
             rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
             target:`web`,
-            plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew HtmlWebpackPlugin({\n\t\t\taddLinkCss: ['./css/${data.name}.css'],\n\t\t\tfilename: './${data.name}.html',\n\t\t\ttemplate: path.resolve(__dirname, '../template/render.tpl'),\n\t\t\thash: true\n})`
+            plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew VueSSRClientPlugin()`
+        };
+        break;
+        case 'pagesVueServer':
+        configAdd = {
+            require:`const VueLoaderPlugin = require('vue-loader/lib/plugin');\nconst VueSSRServerPlugin = require('vue-server-renderer/server-plugin');`,
+            outputFilename:`'[name].js'`,
+            entry:``,
+            output:`libraryTarget: 'commonjs2'`,
+            resolve:`extensions: ['.vue', '.js'],\n\t\talias: {\n\t\t\t'vue$': 'vue/dist/vue.min.js'\n\t\t}\n`,
+            rules:`{\n\t\t\ttest: /\\.vue$/,\n\t\t\texclude: /node_modules/,\n\t\t\tuse: 'vue-loader'\n\t\t},`,
+            target:`node`,
+            plugins:`new Webpack.ProvidePlugin({Vue: 'vue'}),\n\t\tnew VueLoaderPlugin(),\n\t\tnew VueSSRServerPlugin()`
         };
         break;
 		default:
 		break;
 	}
 	if(!configAdd){
+        
 		return '这是一个错误的文件请联系作者';
 	}
 	
@@ -155,7 +168,7 @@ const config = {
     //插件配置
     plugins: [
         new ExtractTextPlugin({
-            filename: "css/${type==='pagesjQuery'||type==='pagesVue'?data.name:'[name]'}.css?r="+Math.random().toString(36).substr(2),
+            filename: "css/${type==='pagesjQuery'||type==='pagesVueClient'||type==='pagesVueServer'?data.name:'[name]'}.css?r="+Math.random().toString(36).substr(2),
             disable: false,
             allChunks: true
         }),
@@ -169,3 +182,5 @@ module.exports = config`;
 
     return webpackString;
 }
+
+

@@ -27,7 +27,6 @@ module.exports = function(name,options = {}){
 				Log.err('.tmd配置文件解析错误,请确认是否为严格JSON格式')
 				return;
 			}
-			
 		}
 		if(tmdConfig&&tmdConfig.type==="work"){
 			createTmd.isAlone = false;
