@@ -82,7 +82,7 @@ module.exports = function(name,options = {}){
 		Log.suc('渲染模板 --> 成功 ').info('开始生成项目源代码')
 		return filemanage.mkdir(srcpath)
 	}).then(function(){
-		return filemanage.mkdir(srcpath+'/component')
+		return filemanage.mkdir(srcpath+'/components')
 	}).then(function(){
 		return filemanage.mkdir(srcpath+'/images')
 	}).then(function(){
