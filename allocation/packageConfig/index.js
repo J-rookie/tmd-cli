@@ -33,6 +33,7 @@ module.exports = function(opt = {
             "extract-text-webpack-plugin": "^4.0.0-beta.0",
             "html-webpack-plugin": "^3.2.0",
             "url-loader": "^1.1.2",
+            "file-loader": "^2.0.0",
             "express": "^4.16.4",
             "html-webpack-plugin": "^3.2.0",
             "http-proxy-middleware": "^0.19.0",
