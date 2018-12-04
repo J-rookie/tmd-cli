@@ -1,6 +1,6 @@
 # tmd-cli
-提供webpack的多种项目打包方案 自用未上架
-使用 下载文件到本地使用npm或cnpm 安装到本地 即可使用tmd命令
+提供webpack的多种项目打包方案 自用未上架  
+使用 下载文件到本地使用npm或cnpm 安装到本地 即可使用tmd命令  
 参数 :
   -V, --version                    查看版本号
   -h, --help                       获取版主信息
